@@ -2,16 +2,24 @@ import Link from 'next/link';
 import { FaUserTie, FaHardHat, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
 import styles from './page.module.css';
 
-// Fetch latest 3 jobs for the homepage preview
+// Sample jobs — shown until MongoDB is connected
+const SAMPLE_JOBS = [
+  { _id: '1', title: 'Senior Accountant', category: 'professional', location: 'Nairobi, CBD', type: 'Permanent', salary: 'KES 90,000 – 120,000/month' },
+  { _id: '3', title: 'Heavy Duty Driver (Class CE)', category: 'labour', location: 'Industrial Area, Nairobi', type: 'Permanent', salary: 'KES 45,000 – 60,000/month' },
+  { _id: '2', title: 'HR Officer', category: 'professional', location: 'Westlands, Nairobi', type: 'Permanent', salary: 'KES 60,000 – 80,000/month' },
+];
+
 async function getLatestJobs() {
   try {
-    const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    // On Vercel, NEXT_PUBLIC_SITE_URL must be set — otherwise fall back to sample jobs
+    const base = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!base) return SAMPLE_JOBS;
     const res = await fetch(`${base}/api/jobs?limit=3`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
+    if (!res.ok) return SAMPLE_JOBS;
     const data = await res.json();
-    return data.jobs || [];
+    return (data.jobs && data.jobs.length > 0) ? data.jobs : SAMPLE_JOBS;
   } catch {
-    return [];
+    return SAMPLE_JOBS;
   }
 }
 
@@ -24,13 +32,13 @@ export default async function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContent}`}>
-          <span className={styles.heroBadge}>🇰🇪 East Africa's Trusted Recruitment Partner</span>
+          <span className={styles.heroBadge}>🇰🇪 East Africa&apos;s Trusted Recruitment Partner</span>
           <h1>
             We Connect <span className={styles.accent}>Great Talent</span><br />
             with Great Employers
           </h1>
           <p>
-            Whether you’re a professional seeking your next career move or a business looking for skilled workers,
+            Whether you&apos;re a professional seeking your next career move or a business looking for skilled workers,
             TrueLak delivers permanent, contract, and temporary placements you can rely on.
           </p>
           <div className={styles.heroCtas}>
@@ -74,7 +82,7 @@ export default async function HomePage() {
             {/* Labour */}
             <div className={`${styles.catCard} ${styles.catLabour}`}>
               <div className={styles.catIcon}><FaHardHat size={32} /></div>
-              <h3>Labour & Blue-Collar Placements</h3>
+              <h3>Labour &amp; Blue-Collar Placements</h3>
               <p>Trade, hospitality, and general labour roles matched with reliable employers.</p>
               <ul className={styles.catList}>
                 {['Drivers (Light & Heavy Duty)','Waiters & Hospitality Staff','Mechanics & Artisans','Security Guards','Cleaners & Domestic Workers','Construction & General Labour'].map(r => (
@@ -99,9 +107,9 @@ export default async function HomePage() {
           </div>
           <div className="grid-3">
             {[
-              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer&#39;s needs and the candidate&#39;s goals before making any placement.' },
+              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer and the candidate before making any placement.' },
               { icon: '⚡', title: 'Fast Turnaround', desc: 'Our extensive talent pool means we can fill most roles within days, not weeks.' },
-              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We don’t just fill roles — we build lasting hiring relationships with businesses across East Africa.' },
+              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We build lasting hiring relationships with businesses across East Africa.' },
               { icon: '✅', title: 'Verified Candidates', desc: 'All candidates are screened, reference-checked, and verified before being presented to employers.' },
               { icon: '🌍', title: 'East Africa Focus', desc: 'Deep local knowledge across Kenya, Uganda, Tanzania, and surrounding markets.' },
               { icon: '📱', title: 'Always Accessible', desc: 'Reach us by phone, WhatsApp, email, or social media — we are always available for you.' },
@@ -117,33 +125,32 @@ export default async function HomePage() {
       </section>
 
       {/* ── Latest Jobs Preview ──────────────────── */}
-      {latestJobs.length > 0 && (
-        <section className={`section ${styles.jobsPreview}`}>
-          <div className="container">
-            <div className="section-heading">
-              <span className="eyebrow">Latest Opportunities</span>
-              <h2>Recently Posted Vacancies</h2>
-            </div>
-            <div className="grid-3">
-              {latestJobs.map((job) => (
-                <div key={job._id} className="card">
-                  <span className={`tag tag-${job.category}`} style={{ marginBottom: '0.75rem', display: 'inline-block' }}>
-                    {job.category === 'professional' ? '💼 Professional' : '🔧 Labour'}
-                  </span>
-                  <h3 style={{ fontSize: '1.05rem', marginBottom: '0.4rem' }}>{job.title}</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '1rem' }}>{job.location} · {job.type}</p>
-                  <Link href={`/jobs/${job._id}`} className="btn btn-navy" style={{ fontSize: '0.88rem', padding: '0.55rem 1.2rem' }}>
-                    Apply Now
-                  </Link>
-                </div>
-              ))}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-              <Link href="/jobs" className="btn btn-primary">View All Vacancies</Link>
-            </div>
+      <section className={`section ${styles.jobsPreview}`}>
+        <div className="container">
+          <div className="section-heading">
+            <span className="eyebrow">Latest Opportunities</span>
+            <h2>Recently Posted Vacancies</h2>
           </div>
-        </section>
-      )}
+          <div className="grid-3">
+            {latestJobs.map((job) => (
+              <div key={job._id} className="card">
+                <span className={`tag tag-${job.category}`} style={{ marginBottom: '0.75rem', display: 'inline-block' }}>
+                  {job.category === 'professional' ? '💼 Professional' : '🔧 Labour'}
+                </span>
+                <h3 style={{ fontSize: '1.05rem', marginBottom: '0.4rem' }}>{job.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.3rem' }}>{job.location}</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.5rem' }}>{job.type} {job.salary ? `· ${job.salary}` : ''}</p>
+                <Link href={`/jobs/${job._id}`} className="btn btn-navy" style={{ fontSize: '0.88rem', padding: '0.55rem 1.2rem', marginTop: '0.75rem', display: 'inline-block' }}>
+                  Apply Now
+                </Link>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+            <Link href="/jobs" className="btn btn-primary">View All Vacancies</Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── CTA Banner ───────────────────────────── */}
       <section className={styles.ctaBanner}>
@@ -151,7 +158,7 @@ export default async function HomePage() {
           <div className={styles.ctaInner}>
             <div>
               <h2>Ready to find your next hire?</h2>
-              <p>Partner with TrueLak and access Kenya's most reliable talent network.</p>
+              <p>Partner with TrueLak and access Kenya&apos;s most reliable talent network.</p>
             </div>
             <div className={styles.ctaBtns}>
               <Link href="/candidates" className="btn btn-primary">Submit Your CV</Link>
