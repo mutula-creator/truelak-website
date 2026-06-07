@@ -17,7 +17,9 @@ async function getJobs(category) {
     if (!res.ok) return ALL_MOCK_JOBS;
     const data = await res.json();
     const jobs = data.jobs || [];
-    return jobs.length > 0 ? jobs : (category ? ALL_MOCK_JOBS.filter(j=>j.category===category) : ALL_MOCK_JOBS);
+    // Only show mock jobs if explicitly flagged as mock (no DB connected)
+    if (data.mock) return jobs.length > 0 ? jobs : (category ? ALL_MOCK_JOBS.filter(j=>j.category===category) : ALL_MOCK_JOBS);
+    return jobs;
   } catch { return category ? ALL_MOCK_JOBS.filter(j=>j.category===category) : ALL_MOCK_JOBS; }
 }
 export default async function JobsPage({ searchParams }) {

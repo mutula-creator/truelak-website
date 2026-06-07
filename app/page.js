@@ -16,7 +16,9 @@ async function getLatestJobs() {
     const res = await fetch(`${base}/api/jobs?limit=3`, { next: { revalidate: 60 } });
     if (!res.ok) return SAMPLE_JOBS;
     const data = await res.json();
-    return (data.jobs && data.jobs.length > 0) ? data.jobs : SAMPLE_JOBS;
+    // Only fall back to samples if no DB connected
+    if (data.mock) return (data.jobs && data.jobs.length > 0) ? data.jobs : SAMPLE_JOBS;
+    return data.jobs || [];
   } catch { return SAMPLE_JOBS; }
 }
 
@@ -104,34 +106,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-       {/* ── Latest Jobs ── */}
-       <section className={`section ${styles.jobsPreview}`}>
+      {/* ── Engagement Types ── */}
+      <section className={`section ${styles.engagementSection}`}>
         <div className="container">
           <div className="section-heading">
-            <span className="eyebrow">Latest Opportunities</span>
-            <h2>Recently Posted Vacancies</h2>
+            <span className="eyebrow">Engagement Types</span>
+            <h2>Flexible Staffing Solutions</h2>
+            <p>Permanent, contract, and temporary placements across all industries.</p>
           </div>
           <div className="grid-3">
-            {latestJobs.map((job) => (
-              <div key={job._id} className="card">
-                <span className={`tag tag-${job.category}`} style={{ marginBottom: '0.75rem', display: 'inline-block' }}>
-                  {job.category === 'professional' ? '💼 Professional' : '🔧 Labour'}
-                </span>
-                <h3 style={{ fontSize: '1.05rem', marginBottom: '0.4rem' }}>{job.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.3rem' }}>{job.location}</p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.5rem' }}>{job.type}{job.salary ? ` · ${job.salary}` : ''}</p>
-                <Link href={`/jobs/${job._id}`} className="btn btn-navy" style={{ fontSize: '0.88rem', padding: '0.55rem 1.2rem', marginTop: '0.75rem', display: 'inline-block' }}>
-                  Apply Now
-                </Link>
+            {[
+              { icon: <FaBuilding size={36} />, title: 'Permanent', desc: 'Full-time direct hires placed with your business for the long term.' },
+              { icon: <FaFileContract size={36} />, title: 'Contract', desc: 'Fixed-term professionals for project-based work or seasonal demand.' },
+              { icon: <FaBolt size={36} />, title: 'Temporary', desc: 'On-demand staff for urgent needs, cover, or trial placements.' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className={`card ${styles.engagementCard}`}>
+                <div className={styles.engagementIcon}>{icon}</div>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{title}</h3>
+                <p style={{ fontSize: '0.92rem', color: 'var(--grey-light)', textAlign: 'center' }}>{desc}</p>
               </div>
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
-            <Link href="/jobs" className="btn btn-primary">View All Vacancies</Link>
-          </div>
         </div>
       </section>
-      
+
       {/* ── Why TrueLak ── */}
       <section className={`section ${styles.whySection}`}>
         <div className="container">
@@ -158,7 +156,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-     
+      {/* ── Latest Jobs ── */}
+      <section className={`section ${styles.jobsPreview}`}>
+        <div className="container">
+          <div className="section-heading">
+            <span className="eyebrow">Latest Opportunities</span>
+            <h2>Recently Posted Vacancies</h2>
+          </div>
+          <div className="grid-3">
+            {latestJobs.map((job) => (
+              <div key={job._id} className="card">
+                <span className={`tag tag-${job.category}`} style={{ marginBottom: '0.75rem', display: 'inline-block' }}>
+                  {job.category === 'professional' ? '💼 Professional' : '🔧 Labour'}
+                </span>
+                <h3 style={{ fontSize: '1.05rem', marginBottom: '0.4rem' }}>{job.title}</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.3rem' }}>{job.location}</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.5rem' }}>{job.type}{job.salary ? ` · ${job.salary}` : ''}</p>
+                <Link href={`/jobs/${job._id}`} className="btn btn-navy" style={{ fontSize: '0.88rem', padding: '0.55rem 1.2rem', marginTop: '0.75rem', display: 'inline-block' }}>
+                  Apply Now
+                </Link>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+            <Link href="/jobs" className="btn btn-primary">View All Vacancies</Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── CTA Banner ── */}
       <section className={styles.ctaBanner}>
