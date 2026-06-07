@@ -105,56 +105,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Engagement Types ── */}
-      <section className={`section ${styles.engagementSection}`}>
-        <div className="container">
-          <div className="section-heading">
-            <span className="eyebrow">Engagement Types</span>
-            <h2>Flexible Staffing Solutions</h2>
-            <p>Permanent, contract, and temporary placements across all industries.</p>
-          </div>
-          <div className="grid-3">
-            {[
-              { icon: <FaBuilding size={36} />, title: 'Permanent', desc: 'Full-time direct hires placed with your business for the long term.' },
-              { icon: <FaFileContract size={36} />, title: 'Contract', desc: 'Fixed-term professionals for project-based work or seasonal demand.' },
-              { icon: <FaBolt size={36} />, title: 'Temporary', desc: 'On-demand staff for urgent needs, cover, or trial placements.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className={`card ${styles.engagementCard}`}>
-                <div className={styles.engagementIcon}>{icon}</div>
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{title}</h3>
-                <p style={{ fontSize: '0.92rem', color: 'var(--grey-light)', textAlign: 'center' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why TrueLak ── */}
-      <section className={`section ${styles.whySection}`}>
-        <div className="container">
-          <div className="section-heading">
-            <span className="eyebrow">Why Choose Us</span>
-            <h2>The TrueLak Difference</h2>
-          </div>
-          <div className="grid-3">
-            {[
-              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer and the candidate before making any placement.' },
-              { icon: '⚡', title: 'Fast Turnaround', desc: 'Our extensive talent pool means we can fill most roles within days, not weeks.' },
-              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We build lasting hiring relationships with businesses across East Africa and UAE.' },
-              { icon: '✅', title: 'Verified Candidates', desc: 'All candidates are screened, reference-checked, and verified before being presented to employers.' },
-              { icon: '🌍', title: 'East Africa Focus', desc: 'Deep local knowledge across Kenya, Uganda, Tanzania, UAE, and surrounding markets.' },
-              { icon: '📱', title: 'Always Accessible', desc: 'Reach us by phone, WhatsApp, email, or social media — we are always available for you.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="card" style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{icon}</div>
-                <h4 style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>{title}</h4>
-                <p style={{ fontSize: '0.9rem', color: 'var(--grey-light)' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Latest Jobs ── */}
       <section className={`section ${styles.jobsPreview}`}>
         <div className="container">
@@ -183,6 +133,33 @@ export default async function HomePage() {
         </div>
       </section>
 
+{/* ── Why TrueLak ── */}
+      <section className={`section ${styles.whySection}`}>
+        <div className="container">
+          <div className="section-heading">
+            <span className="eyebrow">Why Choose Us</span>
+            <h2>The TrueLak Difference</h2>
+          </div>
+          <div className="grid-3">
+            {[
+              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer and the candidate before making any placement.' },
+              { icon: '⚡', title: 'Fast Turnaround', desc: 'Our extensive talent pool means we can fill most roles within days, not weeks.' },
+              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We build lasting hiring relationships with businesses across East Africa and UAE.' },
+              { icon: '✅', title: 'Verified Candidates', desc: 'All candidates are screened, reference-checked, and verified before being presented to employers.' },
+              { icon: '🌍', title: 'East Africa Focus', desc: 'Deep local knowledge across Kenya, Uganda, Tanzania, UAE, and surrounding markets.' },
+              { icon: '📱', title: 'Always Accessible', desc: 'Reach us by phone, WhatsApp, email, or social media — we are always available for you.' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="card" style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{icon}</div>
+                <h4 style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>{title}</h4>
+                <p style={{ fontSize: '0.9rem', color: 'var(--grey-light)' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      
       {/* ── CTA Banner ── */}
       <section className={styles.ctaBanner}>
         <div className="container">
