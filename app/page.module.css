@@ -116,8 +116,8 @@
 .catBadgeFb { font-size: 0.78rem; font-weight: 600; color: #1877F2; background: #EFF6FF; padding: 0.25rem 0.75rem; border-radius: 999px; }
 
 /* ── Why / Jobs / CTA ── */
-.whySection { background: var(--white); }
-.jobsPreview { background: var(--off-white); }
+.whySection { background: var(--off-white); }
+.jobsPreview { background: var(--white); }
 
 .ctaBanner { background: var(--navy); padding: 4rem 0; }
 .ctaInner { display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
