@@ -11,14 +11,13 @@ const SAMPLE_JOBS = [
 
 async function getLatestJobs() {
   try {
-    const base = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!base) return SAMPLE_JOBS;
-    const res = await fetch(`${base}/api/jobs?limit=3`, { next: { revalidate: 60 } });
-    if (!res.ok) return SAMPLE_JOBS;
-    const data = await res.json();
-    // Only fall back to samples if no DB connected
-    if (data.mock) return (data.jobs && data.jobs.length > 0) ? data.jobs : SAMPLE_JOBS;
-    return data.jobs || [];
+    const { default: dbConnect } = await import('@/lib/mongodb');
+    const conn = await dbConnect();
+    if (!conn) return SAMPLE_JOBS;
+    const { Job } = await import('@/lib/models');
+    const jobs = await Job.find({ isActive: true }).sort({ createdAt: -1 }).limit(3).lean();
+    const serialized = JSON.parse(JSON.stringify(jobs));
+    return serialized.length > 0 ? serialized : SAMPLE_JOBS;
   } catch { return SAMPLE_JOBS; }
 }
 
