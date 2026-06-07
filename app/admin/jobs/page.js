@@ -23,9 +23,17 @@ export default function AdminJobsPage() {
 
   const login = async (e) => {
     e.preventDefault();
-    const check = await fetch(`/api/applications?pw=${password}`);
-    if (check.ok) { setAuthed(true); load(password); }
-    else setMsg({ type:'error', text:'Wrong password' });
+    try {
+      const check = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (check.ok) { setAuthed(true); load(password); }
+      else setMsg({ type:'error', text:'Wrong password' });
+    } catch {
+      setMsg({ type:'error', text:'Something went wrong. Try again.' });
+    }
   };
 
   const postJob = async (e) => {
