@@ -1,24 +1,32 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import { Employer } from '@/lib/models';
+import { sendContactEmail } from '@/lib/email';
 
-// Store general contact messages alongside employer enquiries
 export async function POST(request) {
   try {
     const body = await request.json();
-    await dbConnect();
-    await Employer.create({
-      companyName: body.name,
-      contactPerson: body.name,
-      email: body.email,
-      phone: body.phone || 'Not provided',
-      roleNeeded: `CONTACT: ${body.message}`,
-      numberOfStaff: '0',
-      jobCategory: 'both',
+    const conn = await dbConnect();
+    if (conn) {
+      const { Employer } = await import('@/lib/models');
+      await Employer.create({
+        companyName: body.name, contactPerson: body.name,
+        email: body.email, phone: body.phone || 'N/A',
+        roleNeeded: `CONTACT: ${body.message}`, numberOfStaff: '0', message: body.message,
+      });
+    }
+
+    // Send email notification regardless of DB status
+    await sendContactEmail({
+      name:    body.name,
+      email:   body.email,
+      phone:   body.phone,
+      type:    body.type,
       message: body.message,
     });
+
     return NextResponse.json({ success: true }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
+  } catch (err) {
+    console.error('Contact error:', err);
+    return NextResponse.json({ error: 'Failed to send' }, { status: 500 });
   }
 }

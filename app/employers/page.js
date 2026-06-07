@@ -13,7 +13,6 @@ export default function EmployersPage() {
         </div>
       </div>
 
-      {/* How it works */}
       <section className="section">
         <div className="container">
           <div className="section-heading">
@@ -30,28 +29,29 @@ export default function EmployersPage() {
             ].map(({ num, title, desc }) => (
               <div key={num} className={styles.step}>
                 <span className={styles.stepNum}>{num}</span>
-                <div>
-                  <h4>{title}</h4>
-                  <p>{desc}</p>
-                </div>
+                <div><h4>{title}</h4><p>{desc}</p></div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Enquiry Form */}
       <section className="section" style={{ background: 'var(--off-white)' }}>
         <div className="container">
           <div className={styles.formLayout}>
             <div>
-              <span className="eyebrow" style={{ color: 'var(--crimson)', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Partner With Us</span>
-              <h2 style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>Submit a Hiring Enquiry</h2>
-              <p style={{ color: 'var(--grey-light)', marginBottom: '2rem' }}>
+              <span className="eyebrow" style={{ color:'var(--crimson)', fontWeight:700, fontSize:'0.8rem', letterSpacing:'0.15em', textTransform:'uppercase' }}>Partner With Us</span>
+              <h2 style={{ marginTop:'0.5rem', marginBottom:'1rem' }}>Submit a Hiring Enquiry</h2>
+              <p style={{ color:'var(--grey-light)', marginBottom:'2rem' }}>
                 Tell us about the role you need to fill. Our team will respond within 24 business hours.
               </p>
               <div className={styles.perks}>
-                {['No upfront fees — pay only on successful placement','Access to a pre-screened talent pool','Professional & Labour roles covered','Permanent, contract & temporary staffing'].map(p => (
+                {[
+                  'Access to a pre-screened talent pool',
+                  'Professional & Labour roles covered',
+                  'Permanent, contract & temporary staffing',
+                  'East Africa and UAE placements',
+                ].map(p => (
                   <div key={p} className={styles.perk}>✅ {p}</div>
                 ))}
               </div>

@@ -1,37 +1,41 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
+import { sendCvApplicationEmail } from '@/lib/email';
 
 export async function POST(request) {
   try {
     const formData = await request.formData();
-    const conn = await dbConnect();
-    if (!conn) {
-      // No DB yet — just acknowledge receipt
-      return NextResponse.json({ success: true, mock: true }, { status: 201 });
-    }
-    const { Application } = await import('@/lib/models');
-    const { writeFile, mkdir } = await import('fs/promises');
-    const path = await import('path');
-    const fullName = formData.get('fullName');
-    const email = formData.get('email');
-    const phone = formData.get('phone');
+    const fullName    = formData.get('fullName');
+    const email       = formData.get('email');
+    const phone       = formData.get('phone');
     const jobCategory = formData.get('jobCategory');
-    const jobTitle = formData.get('jobTitle') || '';
-    const message = formData.get('message') || '';
-    const cvFile = formData.get('cv');
+    const jobTitle    = formData.get('jobTitle') || '';
+    const message     = formData.get('message') || '';
+    const cvFile      = formData.get('cv');
+
+    const conn = await dbConnect();
     let cvUrl = '';
-    if (cvFile && cvFile.name) {
-      const uploadDir = path.default.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadDir, { recursive: true });
-      const safeFilename = `${Date.now()}-${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const buffer = Buffer.from(await cvFile.arrayBuffer());
-      await writeFile(path.default.join(uploadDir, safeFilename), buffer);
-      cvUrl = `/uploads/${safeFilename}`;
+
+    if (conn) {
+      const { Application } = await import('@/lib/models');
+      const { writeFile, mkdir } = await import('fs/promises');
+      const path = await import('path');
+      if (cvFile && cvFile.name) {
+        const uploadDir = path.default.join(process.cwd(), 'public', 'uploads');
+        await mkdir(uploadDir, { recursive: true });
+        const safeFilename = `${Date.now()}-${cvFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        await writeFile(path.default.join(uploadDir, safeFilename), Buffer.from(await cvFile.arrayBuffer()));
+        cvUrl = `/uploads/${safeFilename}`;
+      }
+      await Application.create({ fullName, email, phone, jobCategory, jobTitle, cvUrl, message });
     }
-    const application = await Application.create({ fullName, email, phone, jobCategory, jobTitle, cvUrl, message });
-    return NextResponse.json({ success: true, id: application._id }, { status: 201 });
+
+    // Send email notification regardless of DB status
+    await sendCvApplicationEmail({ fullName, email, phone, jobCategory, jobTitle, message });
+
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (err) {
-    console.error(err);
+    console.error('Application error:', err);
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 });
   }
 }

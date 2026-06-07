@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { FaUserTie, FaHardHat, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaCheckCircle, FaArrowRight, FaBuilding, FaFileContract, FaBolt } from 'react-icons/fa';
 import styles from './page.module.css';
 
-// Sample jobs — shown until MongoDB is connected
 const SAMPLE_JOBS = [
   { _id: '1', title: 'Senior Accountant', category: 'professional', location: 'Nairobi, CBD', type: 'Permanent', salary: 'KES 90,000 – 120,000/month' },
   { _id: '3', title: 'Heavy Duty Driver (Class CE)', category: 'labour', location: 'Industrial Area, Nairobi', type: 'Permanent', salary: 'KES 45,000 – 60,000/month' },
@@ -11,30 +11,26 @@ const SAMPLE_JOBS = [
 
 async function getLatestJobs() {
   try {
-    // On Vercel, NEXT_PUBLIC_SITE_URL must be set — otherwise fall back to sample jobs
     const base = process.env.NEXT_PUBLIC_SITE_URL;
     if (!base) return SAMPLE_JOBS;
     const res = await fetch(`${base}/api/jobs?limit=3`, { next: { revalidate: 60 } });
     if (!res.ok) return SAMPLE_JOBS;
     const data = await res.json();
     return (data.jobs && data.jobs.length > 0) ? data.jobs : SAMPLE_JOBS;
-  } catch {
-    return SAMPLE_JOBS;
-  }
+  } catch { return SAMPLE_JOBS; }
 }
 
 export default async function HomePage() {
   const latestJobs = await getLatestJobs();
-
   return (
     <>
-      {/* ── Hero ─────────────────────────────────── */}
+      {/* ── Hero ── */}
       <section className={styles.hero}>
         <div className={styles.heroOverlay} />
         <div className={`container ${styles.heroContent}`}>
-          <span className={styles.heroBadge}>🇰🇪 East Africa&apos;s Trusted Recruitment Partner</span>
+          <span className={styles.heroBadge}>East Africa and UAE&apos;s Trusted Recruitment Partner</span>
           <h1>
-            We Connect <span className={styles.accent}>Great Talent</span><br />
+            We Connect <span className={styles.accent}>Great Talent</span>{' '}
             with Great Employers
           </h1>
           <p>
@@ -53,7 +49,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Two Categories ───────────────────────── */}
+      {/* ── Two Categories with images ── */}
       <section className={`section ${styles.categories}`}>
         <div className="container">
           <div className="section-heading">
@@ -65,67 +61,51 @@ export default async function HomePage() {
           <div className={styles.categoryGrid}>
             {/* Professional */}
             <div className={`${styles.catCard} ${styles.catPro}`}>
-              <div className={styles.catIcon}><FaUserTie size={32} /></div>
-              <h3>Professional Placements</h3>
-              <p>White-collar, office-based, and executive roles across East Africa and globally.</p>
-              <ul className={styles.catList}>
-                {['HR & Administration','Finance & Accounting','IT & Technology','Management & Executive','Sales & Marketing','Legal & Compliance'].map(r => (
-                  <li key={r}><FaCheckCircle className={styles.checkPro} /> {r}</li>
-                ))}
-              </ul>
-              <div className={styles.catFooter}>
-                <span className={styles.catBadge}>Primarily LinkedIn</span>
-                <Link href="/jobs?category=professional" className="btn btn-navy">Browse Pro Jobs <FaArrowRight /></Link>
+              <div className={styles.catImage}>
+                <Image src="/images/white.jpg" alt="Professional placements" fill style={{ objectFit: 'cover' }} />
+                <div className={styles.catImageOverlay} />
+                <h3 className={styles.catImageTitle}>Professional Placements</h3>
+              </div>
+              <div className={styles.catBody}>
+                <p>White-collar, office-based, and executive roles across East Africa, UAE and globally.</p>
+                <ul className={styles.catList}>
+                  {['HR & Administration','Finance & Accounting','IT & Technology','Management & Executive','Sales & Marketing','Legal & Compliance'].map(r => (
+                    <li key={r}><FaCheckCircle className={styles.checkPro} /> {r}</li>
+                  ))}
+                </ul>
+                <div className={styles.catFooter}>
+                  <span className={styles.catBadge}>Primarily LinkedIn</span>
+                  <Link href="/jobs?category=professional" className="btn btn-navy">Browse Pro Jobs <FaArrowRight /></Link>
+                </div>
               </div>
             </div>
 
             {/* Labour */}
             <div className={`${styles.catCard} ${styles.catLabour}`}>
-              <div className={styles.catIcon}><FaHardHat size={32} /></div>
-              <h3>Labour &amp; Blue-Collar Placements</h3>
-              <p>Trade, hospitality, and general labour roles matched with reliable employers.</p>
-              <ul className={styles.catList}>
-                {['Drivers (Light & Heavy Duty)','Waiters & Hospitality Staff','Mechanics & Artisans','Security Guards','Cleaners & Domestic Workers','Construction & General Labour'].map(r => (
-                  <li key={r}><FaCheckCircle className={styles.checkLabour} /> {r}</li>
-                ))}
-              </ul>
-              <div className={styles.catFooter}>
-                <span className={styles.catBadgeFb}>Primarily Facebook</span>
-                <Link href="/jobs?category=labour" className="btn btn-primary">Browse Labour Jobs <FaArrowRight /></Link>
+              <div className={styles.catImage}>
+                <Image src="/images/blue.jpg" alt="Labour placements" fill style={{ objectFit: 'cover' }} />
+                <div className={styles.catImageOverlay} />
+                <h3 className={styles.catImageTitle}>Labour &amp; Blue-Collar Placements</h3>
+              </div>
+              <div className={styles.catBody}>
+                <p>Trade, hospitality, and general labour roles matched with reliable employers.</p>
+                <ul className={styles.catList}>
+                  {['Drivers (Light & Heavy Duty)','Waiters & Hospitality Staff','Mechanics & Artisans','Security Guards','Cleaners & Domestic Workers','Construction & General Labour'].map(r => (
+                    <li key={r}><FaCheckCircle className={styles.checkLabour} /> {r}</li>
+                  ))}
+                </ul>
+                <div className={styles.catFooter}>
+                  <span className={styles.catBadgeFb}>Primarily Facebook</span>
+                  <Link href="/jobs?category=labour" className="btn btn-primary">Browse Labour Jobs <FaArrowRight /></Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Why TrueLak ─────────────────────────── */}
-      <section className={`section ${styles.whySection}`}>
-        <div className="container">
-          <div className="section-heading">
-            <span className="eyebrow">Why Choose Us</span>
-            <h2>The TrueLak Difference</h2>
-          </div>
-          <div className="grid-3">
-            {[
-              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer and the candidate before making any placement.' },
-              { icon: '⚡', title: 'Fast Turnaround', desc: 'Our extensive talent pool means we can fill most roles within days, not weeks.' },
-              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We build lasting hiring relationships with businesses across East Africa.' },
-              { icon: '✅', title: 'Verified Candidates', desc: 'All candidates are screened, reference-checked, and verified before being presented to employers.' },
-              { icon: '🌍', title: 'East Africa Focus', desc: 'Deep local knowledge across Kenya, Uganda, Tanzania, and surrounding markets.' },
-              { icon: '📱', title: 'Always Accessible', desc: 'Reach us by phone, WhatsApp, email, or social media — we are always available for you.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="card" style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{icon}</div>
-                <h4 style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>{title}</h4>
-                <p style={{ fontSize: '0.9rem', color: 'var(--grey-light)' }}>{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Latest Jobs Preview ──────────────────── */}
-      <section className={`section ${styles.jobsPreview}`}>
+       {/* ── Latest Jobs ── */}
+       <section className={`section ${styles.jobsPreview}`}>
         <div className="container">
           <div className="section-heading">
             <span className="eyebrow">Latest Opportunities</span>
@@ -139,7 +119,7 @@ export default async function HomePage() {
                 </span>
                 <h3 style={{ fontSize: '1.05rem', marginBottom: '0.4rem' }}>{job.title}</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.3rem' }}>{job.location}</p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.5rem' }}>{job.type} {job.salary ? `· ${job.salary}` : ''}</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginBottom: '0.5rem' }}>{job.type}{job.salary ? ` · ${job.salary}` : ''}</p>
                 <Link href={`/jobs/${job._id}`} className="btn btn-navy" style={{ fontSize: '0.88rem', padding: '0.55rem 1.2rem', marginTop: '0.75rem', display: 'inline-block' }}>
                   Apply Now
                 </Link>
@@ -151,14 +131,42 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      
+      {/* ── Why TrueLak ── */}
+      <section className={`section ${styles.whySection}`}>
+        <div className="container">
+          <div className="section-heading">
+            <span className="eyebrow">Why Choose Us</span>
+            <h2>The TrueLak Difference</h2>
+          </div>
+          <div className="grid-3">
+            {[
+              { icon: '🎯', title: 'Precision Matching', desc: 'We take time to understand both the employer and the candidate before making any placement.' },
+              { icon: '⚡', title: 'Fast Turnaround', desc: 'Our extensive talent pool means we can fill most roles within days, not weeks.' },
+              { icon: '🤝', title: 'Long-Term Partnerships', desc: 'We build lasting hiring relationships with businesses across East Africa and UAE.' },
+              { icon: '✅', title: 'Verified Candidates', desc: 'All candidates are screened, reference-checked, and verified before being presented to employers.' },
+              { icon: '🌍', title: 'East Africa Focus', desc: 'Deep local knowledge across Kenya, Uganda, Tanzania, UAE, and surrounding markets.' },
+              { icon: '📱', title: 'Always Accessible', desc: 'Reach us by phone, WhatsApp, email, or social media — we are always available for you.' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="card" style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{icon}</div>
+                <h4 style={{ fontSize: '1.05rem', marginBottom: '0.5rem' }}>{title}</h4>
+                <p style={{ fontSize: '0.9rem', color: 'var(--grey-light)' }}>{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* ── CTA Banner ───────────────────────────── */}
+     
+
+      {/* ── CTA Banner ── */}
       <section className={styles.ctaBanner}>
         <div className="container">
           <div className={styles.ctaInner}>
             <div>
               <h2>Ready to find your next hire?</h2>
-              <p>Partner with TrueLak and access Kenya&apos;s most reliable talent network.</p>
+              <p>Partner with TrueLak and access East Africa and UAE&apos;s most reliable talent network.</p>
             </div>
             <div className={styles.ctaBtns}>
               <Link href="/candidates" className="btn btn-primary">Submit Your CV</Link>

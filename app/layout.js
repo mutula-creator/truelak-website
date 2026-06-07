@@ -4,15 +4,8 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
 export const metadata = {
-  title: 'TrueLak Recruitment Agency | Professional & Labour Placements in Kenya',
-  description: 'TrueLak connects top talent with leading employers across East Africa. Find professional jobs, labour placements, and skilled workers today.',
-  keywords: 'recruitment agency Kenya, jobs Nairobi, HR jobs, driver jobs Kenya, staffing agency East Africa',
-  openGraph: {
-    title: 'TrueLak Recruitment Agency',
-    description: 'Connecting talent with opportunity across East Africa.',
-    url: process.env.NEXT_PUBLIC_SITE_URL,
-    siteName: 'TrueLak Recruitment Agency',
-  },
+  title: 'TrueLak Recruitment Agency | Professional & Labour Placements in East Africa & UAE',
+  description: 'TrueLak connects top talent with leading employers across East Africa and UAE.',
 };
 
 export default function RootLayout({ children }) {

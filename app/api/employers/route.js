@@ -1,15 +1,31 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
+import { sendEmployerEnquiryEmail } from '@/lib/email';
 
 export async function POST(request) {
   try {
     const body = await request.json();
     const conn = await dbConnect();
-    if (!conn) return NextResponse.json({ success: true, mock: true }, { status: 201 });
-    const { Employer } = await import('@/lib/models');
-    const employer = await Employer.create(body);
-    return NextResponse.json({ success: true, id: employer._id }, { status: 201 });
-  } catch {
+    if (conn) {
+      const { Employer } = await import('@/lib/models');
+      await Employer.create(body);
+    }
+
+    // Send email notification regardless of DB status
+    await sendEmployerEnquiryEmail({
+      companyName:   body.companyName,
+      contactPerson: body.contactPerson,
+      email:         body.email,
+      phone:         body.phone,
+      roleNeeded:    body.roleNeeded,
+      numberOfStaff: body.numberOfStaff,
+      jobCategory:   body.jobCategory,
+      message:       body.message,
+    });
+
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (err) {
+    console.error('Employer error:', err);
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 });
   }
 }
