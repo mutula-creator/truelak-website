@@ -5,17 +5,62 @@ import { useForm } from 'react-hook-form';
 export default function CvForm() {
   const [status, setStatus]       = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const uploadCV = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload-cv', { method: 'POST', body: formData });
-      if (!res.ok) return null;
+      setUploadProgress('Getting upload URL...');
+
+      // Step 1: get presigned URL from our API
+      const res = await fetch('/api/uploadthing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: [{ name: file.name, size: file.size, type: file.type || 'application/octet-stream' }],
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('Presign failed:', err);
+        return null;
+      }
+
       const data = await res.json();
-      return data.url || null;
-    } catch { return null; }
+      console.log('Presign response:', JSON.stringify(data));
+
+      // Handle different response formats
+      const uploadData = Array.isArray(data) ? data[0] : data?.data?.[0] || data?.[0];
+      if (!uploadData) {
+        console.error('No upload data in response:', data);
+        return null;
+      }
+
+      setUploadProgress('Uploading file...');
+
+      // Step 2: upload to the presigned URL
+      const uploadUrl = uploadData.url;
+      const fields    = uploadData.fields || {};
+      const fileUrl   = uploadData.fileUrl || uploadData.ufsUrl || uploadData.appUrl;
+
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('file', file);
+
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+
+      if (!uploadRes.ok && uploadRes.status !== 204) {
+        console.error('Upload failed:', uploadRes.status);
+        return null;
+      }
+
+      setUploadProgress('CV uploaded ✅');
+      return fileUrl || null;
+    } catch (err) {
+      console.error('Upload error:', err);
+      return null;
+    }
   };
 
   const onSubmit = async (data) => {

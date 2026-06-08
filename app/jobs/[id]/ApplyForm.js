@@ -5,23 +5,58 @@ import { useForm } from 'react-hook-form';
 export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
   const [status, setStatus]       = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const uploadCV = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileName', file.name);
-      formData.append('fileType', file.type);
+      setUploadProgress('Getting upload URL...');
 
-      const res = await fetch('/api/upload-cv', {
+      // Step 1: get presigned URL from our API
+      const res = await fetch('/api/uploadthing', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: [{ name: file.name, size: file.size, type: file.type || 'application/octet-stream' }],
+        }),
       });
 
-      if (!res.ok) return null;
+      if (!res.ok) {
+        const err = await res.text();
+        console.error('Presign failed:', err);
+        return null;
+      }
+
       const data = await res.json();
-      return data.url || null;
+      console.log('Presign response:', JSON.stringify(data));
+
+      // Handle different response formats
+      const uploadData = Array.isArray(data) ? data[0] : data?.data?.[0] || data?.[0];
+      if (!uploadData) {
+        console.error('No upload data in response:', data);
+        return null;
+      }
+
+      setUploadProgress('Uploading file...');
+
+      // Step 2: upload to the presigned URL
+      const uploadUrl = uploadData.url;
+      const fields    = uploadData.fields || {};
+      const fileUrl   = uploadData.fileUrl || uploadData.ufsUrl || uploadData.appUrl;
+
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('file', file);
+
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+
+      if (!uploadRes.ok && uploadRes.status !== 204) {
+        console.error('Upload failed:', uploadRes.status);
+        return null;
+      }
+
+      setUploadProgress('CV uploaded ✅');
+      return fileUrl || null;
     } catch (err) {
       console.error('Upload error:', err);
       return null;
@@ -38,7 +73,9 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
         cvFileName = data.cv[0].name;
         cvUrl = await uploadCV(data.cv[0]) || '';
       }
+
       setUploading(false);
+      setUploadProgress('');
 
       const fd = new FormData();
       fd.append('fullName',    data.fullName);
@@ -55,6 +92,7 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
       else setStatus('error');
     } catch {
       setUploading(false);
+      setUploadProgress('');
       setStatus('error');
     }
   };
@@ -89,14 +127,14 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
         <label>Upload CV (PDF or Word) *</label>
         <input type="file" accept=".pdf,.doc,.docx" {...register('cv', { required: 'Please upload your CV' })} />
         {errors.cv && <span className="form-error">{errors.cv.message}</span>}
-        {uploading && <p style={{ fontSize: '0.85rem', color: 'var(--grey-light)', marginTop: '0.3rem' }}>⏳ Uploading CV...</p>}
+        {uploading && <p style={{ fontSize: '0.85rem', color: 'var(--crimson)', marginTop: '0.3rem' }}>⏳ {uploadProgress}</p>}
       </div>
       <div className="form-group">
         <label>Cover Message</label>
         <textarea {...register('message')} placeholder="Tell us why you are a great fit..." rows={4} />
       </div>
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting || uploading}>
-        {uploading ? 'Uploading CV...' : isSubmitting ? 'Submitting...' : 'Submit Application'}
+        {uploading ? uploadProgress || 'Uploading...' : isSubmitting ? 'Submitting...' : 'Submit Application'}
       </button>
     </form>
   );
