@@ -29,11 +29,11 @@ export default function Navbar() {
       <div className={`container ${styles.inner}`}>
         <Link href="/" className={styles.logo}>
           <Image
-            src="/images/truelak-logo.svg"
+            src="/images/logo.png"
             alt="TrueLak Recruitment Agency"
-            width={130}
-            height={48}
-            style={{ objectFit: 'contain', height: '48px', width: 'auto' }}
+            width={140}
+            height={44}
+            style={{ objectFit: 'contain', height: '44px', width: 'auto', display: 'block' }}
             priority
           />
         </Link>
@@ -42,7 +42,7 @@ export default function Navbar() {
           {links.map((l) => (
             <Link key={l.href} href={l.href} className={styles.navLink}>{l.label}</Link>
           ))}
-          <Link href="/jobs" className="btn btn-primary" style={{ padding: '0.55rem 1.3rem', fontSize: '0.88rem' }}>
+          <Link href="/jobs" className="btn btn-primary" style={{ padding: '0.55rem 1.4rem', fontSize: '0.88rem' }}>
             Find a Job
           </Link>
         </nav>

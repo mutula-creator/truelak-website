@@ -10,16 +10,12 @@ export default function Footer() {
       <div className={`container ${styles.grid}`}>
         {/* Brand */}
         <div className={styles.brand}>
-          <div className={styles.logoWrap}>
-            <Image src="/images/truelak-logo.svg" alt="TrueLak Recruitment Agency" width={130} height={48}
-              style={{ objectFit: 'contain', height: '48px', width: 'auto' }} />
-          </div>
-          <p>Connecting talent with opportunity across East Africa and UAE. Professional &amp; Labour placements you can trust.</p>
-          <div className={styles.socials}>
-            <a href="https://www.facebook.com/p/TrueLak-Recruitment-Agency-100075816026848" target="_blank" rel="noreferrer" aria-label="Facebook"><FaFacebook size={20} /></a>
-            <a href="https://linkedin.com/company/truelak-recruitment-agency" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin size={20} /></a>
-          </div>
-        </div>
+  <p>Connecting talent with opportunity across East Africa and UAE. Professional &amp; Labour placements you can trust.</p>
+  <div className={styles.socials}>
+    <a href="https://www.facebook.com/p/TrueLak-Recruitment-Agency-100075816026848" target="_blank" rel="noreferrer" aria-label="Facebook"><FaFacebook size={20} /></a>
+    <a href="https://linkedin.com/company/truelak-recruitment-agency" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin size={20} /></a>
+  </div>
+</div>
 
         {/* Quick Links */}
         <div>
