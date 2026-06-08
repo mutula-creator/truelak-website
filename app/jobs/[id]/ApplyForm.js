@@ -3,38 +3,25 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
-  const [status, setStatus]     = useState(null);
+  const [status, setStatus]       = useState(null);
   const [uploading, setUploading] = useState(false);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const uploadCV = async (file) => {
     try {
-      // Step 1: request upload URL from Uploadthing
-      const presignRes = await fetch('/api/uploadthing', {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', file.name);
+      formData.append('fileType', file.type);
+
+      const res = await fetch('/api/upload-cv', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          files: [{ name: file.name, size: file.size, type: file.type }],
-          acl: 'public-read',
-        }),
+        body: formData,
       });
 
-      if (!presignRes.ok) return null;
-      const presignData = await presignRes.json();
-
-      // Uploadthing returns array of { url, fields, fileUrl }
-      const uploadInfo = presignData?.[0];
-      if (!uploadInfo) return null;
-
-      // Step 2: upload the actual file
-      const form = new FormData();
-      if (uploadInfo.fields) {
-        Object.entries(uploadInfo.fields).forEach(([k, v]) => form.append(k, v));
-      }
-      form.append('file', file);
-
-      await fetch(uploadInfo.url, { method: 'POST', body: form });
-      return uploadInfo.fileUrl || uploadInfo.ufsUrl || null;
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.url || null;
     } catch (err) {
       console.error('Upload error:', err);
       return null;

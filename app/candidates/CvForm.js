@@ -9,23 +9,12 @@ export default function CvForm() {
 
   const uploadCV = async (file) => {
     try {
-      const presignRes = await fetch('/api/uploadthing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          files: [{ name: file.name, size: file.size, type: file.type }],
-        }),
-      });
-      if (!presignRes.ok) return null;
-      const presignData = await presignRes.json();
-      const uploadInfo  = presignData?.[0];
-      if (!uploadInfo) return null;
-
-      const form = new FormData();
-      if (uploadInfo.fields) Object.entries(uploadInfo.fields).forEach(([k, v]) => form.append(k, v));
-      form.append('file', file);
-      await fetch(uploadInfo.url, { method: 'POST', body: form });
-      return uploadInfo.fileUrl || uploadInfo.ufsUrl || null;
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload-cv', { method: 'POST', body: formData });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.url || null;
     } catch { return null; }
   };
 
