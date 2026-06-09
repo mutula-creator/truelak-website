@@ -30,7 +30,7 @@ export default function AboutPage() {
               TrueLak Recruitment Agency was founded with a simple but powerful conviction: too many talented people in East Africa and the UAE struggle to find the right opportunities, while too many businesses struggle to find the right people. We set out to change that.
             </p>
             <p style={{ marginBottom:'1rem', fontSize:'1.02rem' }}>
-              Today, we are a full-service talent acquisition firm specialising in permanent, contract, and temporary placements. We support businesses across Kenya, the wider East African region, and UAE — as well as organisations looking to hire remotely — by delivering strategic, value-driven recruitment solutions.
+              Today, we are a full-service talent acquisition firm specialising in permanent, contract, and temporary placements. We support businesses across Kenya, the wider East African region, the UAE, and globally by delivering strategic, value-driven recruitment solutions.
             </p>
             <p style={{ fontSize:'1.02rem' }}>
               At TrueLak, we don&apos;t just fill roles. We build long-term hiring partnerships.
