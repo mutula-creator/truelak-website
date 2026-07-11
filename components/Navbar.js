@@ -9,7 +9,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About Us' },
   { href: '/employers', label: 'For Employers' },
-  { href: '/candidates', label: 'For Job Seekers' },
+  { href: '/job-seekers', label: 'For Job Seekers' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
 ];

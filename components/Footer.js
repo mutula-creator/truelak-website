@@ -10,19 +10,19 @@ export default function Footer() {
       <div className={`container ${styles.grid}`}>
         {/* Brand */}
         <div className={styles.brand}>
-  <p>Connecting talent with opportunity across East Africa and UAE. Professional &amp; Labour placements you can trust.</p>
-  <div className={styles.socials}>
-    <a href="https://www.facebook.com/p/TrueLak-Recruitment-Agency-100075816026848" target="_blank" rel="noreferrer" aria-label="Facebook"><FaFacebook size={20} /></a>
-    <a href="https://linkedin.com/company/truelak-recruitment-agency" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin size={20} /></a>
-  </div>
-</div>
+          <p>Connecting talent with opportunity across East Africa and UAE. Professional &amp; Labour placements you can trust.</p>
+          <div className={styles.socials}>
+            <a href="https://www.facebook.com/p/TrueLak-Recruitment-Agency-100075816026848" target="_blank" rel="noreferrer" aria-label="Facebook"><FaFacebook size={20} /></a>
+            <a href="https://linkedin.com/company/truelak-recruitment-agency" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin size={20} /></a>
+          </div>
+        </div>
 
         {/* Quick Links */}
         <div>
           <h4 className={styles.heading}>Quick Links</h4>
           <ul className={styles.list}>
             {[['/','Home'],['/about','About Us'],['/jobs','Find a Job'],
-              ['/employers','For Employers'],['/candidates','For Job Seekers'],
+              ['/employers','For Employers'],['/job-seekers','For Job Seekers'],
               ['/blog','Blog'],['/contact','Contact Us']
             ].map(([href, label]) => (
               <li key={href}><Link href={href}>{label}</Link></li>
@@ -35,8 +35,8 @@ export default function Footer() {
           <h4 className={styles.heading}>Contact Us</h4>
           <ul className={styles.contact}>
             <li><FaMapMarkerAlt /> Nairobi, Kenya &amp; UAE</li>
-            <li><FaPhone /> <a href="tel:+254700000000">+254 700 000 000</a></li>
-            <li><FaEnvelope /> <a href="mailto:info@truelak.co.ke">info@truelak.co.ke</a></li>
+            <li><FaPhone /> <a href="tel:+254735111625">+254 735 111 625</a></li>
+            <li><FaEnvelope /> <a href="mailto:info@truelakrecruitment.com">info@truelakrecruitment.com</a></li>
           </ul>
         </div>
       </div>
