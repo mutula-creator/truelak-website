@@ -153,7 +153,7 @@ export default async function HomePage() {
               <p>Partner with TrueLak and access Kenya's most reliable talent network.</p>
             </div>
             <div className={styles.ctaBtns}>
-              <Link href="/candidates" className="btn btn-primary">Submit Your CV</Link>
+              <Link href="/job-seekers" className="btn btn-primary">Submit Your CV</Link>
               <Link href="/employers" className="btn btn-outline">Post a Job</Link>
             </div>
           </div>

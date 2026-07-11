@@ -31,7 +31,7 @@ export default function Footer() {
             {[
               ['/','Home'],['/about','About Us'],['/services','Services'],
               ['/jobs','Current Vacancies'],['/employers','For Employers'],
-              ['/candidates','For Job Seekers'],['/contact','Contact Us'],
+              ['/job-seekers','For Job Seekers'],['/contact','Contact Us'],
             ].map(([href, label]) => (
               <li key={href}><Link href={href}>{label}</Link></li>
             ))}

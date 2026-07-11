@@ -11,7 +11,7 @@ const links = [
   { href: '/services', label: 'Services' },
   { href: '/jobs', label: 'Current Vacancies' },
   { href: '/employers', label: 'For Employers' },
-  { href: '/candidates', label: 'For Job Seekers' },
+  { href: '/job-seekers', label: 'For Job Seekers' },
   { href: '/contact', label: 'Contact' },
 ];
 

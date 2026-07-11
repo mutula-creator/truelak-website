@@ -151,7 +151,7 @@ export default function BlogPostCV() {
                 Submit your CV to TrueLak today and our recruitment team will match you with suitable opportunities
                 across East Africa and the UAE — completely free of charge.
               </p>
-              <Link href="/candidates" className="btn btn-primary">Submit Your CV</Link>
+              <Link href="/job-seekers" className="btn btn-primary">Submit Your CV</Link>
             </div>
 
           </div>
@@ -174,7 +174,7 @@ export default function BlogPostCV() {
             <div className={styles.sideCard}>
               <h4>Looking for work?</h4>
               <p>Submit your CV to TrueLak and we will match you with the right employer.</p>
-              <Link href="/candidates" className="btn btn-primary" style={{ display: 'block', textAlign: 'center', marginTop: '1rem' }}>
+              <Link href="/job-seekers" className="btn btn-primary" style={{ display: 'block', textAlign: 'center', marginTop: '1rem' }}>
                 Submit CV
               </Link>
             </div>

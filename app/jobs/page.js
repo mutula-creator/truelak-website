@@ -55,7 +55,7 @@ export default async function JobsPage({ searchParams }) {
               <p style={{ color: 'var(--grey-light)', marginBottom: '1.5rem' }}>
                 Submit your CV and we will contact you when a match is found.
               </p>
-              <Link href="/candidates" className="btn btn-primary">Submit Your CV</Link>
+              <Link href="job-seekers" className="btn btn-primary">Submit Your CV</Link>
             </div>
           )}
         </div>
