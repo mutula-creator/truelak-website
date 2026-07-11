@@ -30,13 +30,6 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
 
   const onSubmit = async (data) => {
     try {
-      // Verify Turnstile
-      const token = window.turnstile?.getResponse() || '';
-      if (!token) {
-        alert('Please complete the security check.');
-        return;
-      }
-
       setUploading(true);
       let cvUrl = '';
       let cvFileName = '';
@@ -57,16 +50,11 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
       fd.append('message',     data.message || '');
       fd.append('cvUrl',       cvUrl);
       fd.append('cvFileName',  cvFileName);
-      fd.append('token',       token);
+      fd.append('website',     data.website || '');
 
       const res = await fetch('/api/applications', { method: 'POST', body: fd });
-      if (res.ok) {
-        setStatus('success');
-        reset();
-        window.turnstile?.reset();
-      } else {
-        setStatus('error');
-      }
+      if (res.ok) { setStatus('success'); reset(); }
+      else setStatus('error');
     } catch {
       setUploading(false);
       setUploadMsg('');
@@ -83,6 +71,7 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {status === 'error' && <div className="alert alert-error">Something went wrong. Please try again or WhatsApp us.</div>}
+      <input type="text" name="website" style={{ display:'none' }} tabIndex="-1" autoComplete="off" {...register('website')} />
       <div className="form-group">
         <label>Full Name *</label>
         <input {...register('fullName', { required: 'Required' })} placeholder="e.g. Jane Muthoni" />
@@ -108,11 +97,6 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
         <label>Cover Message</label>
         <textarea {...register('message')} placeholder="Tell us why you are a great fit..." rows={4} />
       </div>
-      <div
-        className="cf-turnstile"
-        data-sitekey="0x4AAAAAADz7Ang5Mg9YMkhh"
-        style={{ marginBottom: '1rem' }}
-      />
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting || uploading}>
         {uploading ? uploadMsg : isSubmitting ? 'Submitting...' : 'Submit Application'}
       </button>

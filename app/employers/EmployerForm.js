@@ -8,23 +8,13 @@ export default function EmployerForm() {
 
   const onSubmit = async (data) => {
     try {
-      const token = window.turnstile?.getResponse() || '';
-      if (!token) {
-        alert('Please complete the security check.');
-        return;
-      }
       const res = await fetch('/api/employers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, token }),
+        body: JSON.stringify(data),
       });
-      if (res.ok) {
-        setStatus('success');
-        reset();
-        window.turnstile?.reset();
-      } else {
-        setStatus('error');
-      }
+      if (res.ok) { setStatus('success'); reset(); }
+      else setStatus('error');
     } catch { setStatus('error'); }
   };
 
@@ -35,6 +25,7 @@ export default function EmployerForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {status === 'error' && <div className="alert alert-error">Something went wrong. Please WhatsApp us directly.</div>}
+      <input type="text" name="website" style={{ display:'none' }} tabIndex="-1" autoComplete="off" {...register('website')} />
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem' }}>
         <div className="form-group"><label>Company Name *</label><input {...register('companyName',{required:true})} placeholder="Acme Ltd" />{errors.companyName && <span className="form-error">Required</span>}</div>
         <div className="form-group"><label>Contact Person *</label><input {...register('contactPerson',{required:true})} placeholder="John Kamau" />{errors.contactPerson && <span className="form-error">Required</span>}</div>
@@ -55,11 +46,6 @@ export default function EmployerForm() {
         </div>
       </div>
       <div className="form-group"><label>Additional Details</label><textarea {...register('message')} placeholder="Any specific requirements..." rows={4} /></div>
-      <div
-        className="cf-turnstile"
-        data-sitekey="0x4AAAAAADz7Ang5Mg9YMkhh"
-        style={{ marginBottom: '1rem' }}
-      />
       <button type="submit" className="btn btn-primary" style={{ width:'100%' }} disabled={isSubmitting}>
         {isSubmitting ? 'Sending...' : 'Submit Hiring Enquiry'}
       </button>

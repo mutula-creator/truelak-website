@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 export default function ContactForm() {
@@ -8,23 +8,13 @@ export default function ContactForm() {
 
   const onSubmit = async (data) => {
     try {
-      const token = window.turnstile?.getResponse() || '';
-      if (!token) {
-        alert('Please complete the security check.');
-        return;
-      }
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, token }),
+        body: JSON.stringify(data),
       });
-      if (res.ok) {
-        setStatus('success');
-        reset();
-        window.turnstile?.reset();
-      } else {
-        setStatus('error');
-      }
+      if (res.ok) { setStatus('success'); reset(); }
+      else setStatus('error');
     } catch {
       setStatus('error');
     }
@@ -37,6 +27,7 @@ export default function ContactForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {status === 'error' && <div className="alert alert-error">Something went wrong. Please WhatsApp us directly.</div>}
+      <input type="text" name="website" style={{ display:'none' }} tabIndex="-1" autoComplete="off" {...register('website')} />
       <div className="form-group"><label>Your Name *</label><input {...register('name', { required: 'Required' })} placeholder="Full name" />{errors.name && <span className="form-error">{errors.name.message}</span>}</div>
       <div className="form-group"><label>Email *</label><input type="email" {...register('email', { required: 'Required' })} placeholder="you@email.com" />{errors.email && <span className="form-error">{errors.email.message}</span>}</div>
       <div className="form-group"><label>Phone</label><input {...register('phone')} placeholder="+254 735 111 625" /></div>
@@ -48,11 +39,6 @@ export default function ContactForm() {
         </select>
       </div>
       <div className="form-group"><label>Message *</label><textarea {...register('message', { required: 'Required' })} placeholder="How can we help you?" rows={5} />{errors.message && <span className="form-error">{errors.message.message}</span>}</div>
-      <div
-        className="cf-turnstile"
-        data-sitekey="0x4AAAAAADz7Ang5Mg9YMkhh"
-        style={{ marginBottom: '1rem' }}
-      />
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting}>
         {isSubmitting ? 'Sending...' : 'Send Message'}
       </button>
