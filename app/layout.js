@@ -2,6 +2,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'TrueLak Recruitment Agency | Professional & Labour Placements in East Africa & UAE',
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
         <main>{children}</main>
         <Footer />
         <WhatsAppButton />
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
       </body>
     </html>
   );

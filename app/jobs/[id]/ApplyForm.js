@@ -13,7 +13,6 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
       setUploadMsg('Uploading CV...');
       const formData = new FormData();
       formData.append('file', file);
-
       const res = await fetch('/api/upload-cv', { method: 'POST', body: formData });
       if (!res.ok) {
         const err = await res.json();
@@ -31,6 +30,13 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
 
   const onSubmit = async (data) => {
     try {
+      // Verify Turnstile
+      const token = window.turnstile?.getResponse() || '';
+      if (!token) {
+        alert('Please complete the security check.');
+        return;
+      }
+
       setUploading(true);
       let cvUrl = '';
       let cvFileName = '';
@@ -51,10 +57,16 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
       fd.append('message',     data.message || '');
       fd.append('cvUrl',       cvUrl);
       fd.append('cvFileName',  cvFileName);
+      fd.append('token',       token);
 
       const res = await fetch('/api/applications', { method: 'POST', body: fd });
-      if (res.ok) { setStatus('success'); reset(); }
-      else setStatus('error');
+      if (res.ok) {
+        setStatus('success');
+        reset();
+        window.turnstile?.reset();
+      } else {
+        setStatus('error');
+      }
     } catch {
       setUploading(false);
       setUploadMsg('');
@@ -83,7 +95,7 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
       </div>
       <div className="form-group">
         <label>Phone *</label>
-        <input {...register('phone', { required: 'Required' })} placeholder="+254 700 000 000" />
+        <input {...register('phone', { required: 'Required' })} placeholder="+254 735 111 625" />
         {errors.phone && <span className="form-error">{errors.phone.message}</span>}
       </div>
       <div className="form-group">
@@ -96,6 +108,11 @@ export default function ApplyForm({ jobId, jobTitle, jobCategory }) {
         <label>Cover Message</label>
         <textarea {...register('message')} placeholder="Tell us why you are a great fit..." rows={4} />
       </div>
+      <div
+        className="cf-turnstile"
+        data-sitekey="0x4AAAAAADz7Ang5Mg9YMkhh"
+        style={{ marginBottom: '1rem' }}
+      />
       <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isSubmitting || uploading}>
         {uploading ? uploadMsg : isSubmitting ? 'Submitting...' : 'Submit Application'}
       </button>

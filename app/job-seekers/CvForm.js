@@ -23,6 +23,13 @@ export default function CvForm() {
 
   const onSubmit = async (data) => {
     try {
+      // Verify Turnstile
+      const token = window.turnstile?.getResponse() || '';
+      if (!token) {
+        alert('Please complete the security check.');
+        return;
+      }
+
       setUploading(true);
       let cvUrl = '', cvFileName = '';
       if (data.cv?.[0]) {
@@ -41,10 +48,16 @@ export default function CvForm() {
       fd.append('message',     data.message || '');
       fd.append('cvUrl',       cvUrl);
       fd.append('cvFileName',  cvFileName);
+      fd.append('token',       token);
 
       const res = await fetch('/api/applications', { method: 'POST', body: fd });
-      if (res.ok) { setStatus('success'); reset(); }
-      else setStatus('error');
+      if (res.ok) {
+        setStatus('success');
+        reset();
+        window.turnstile?.reset();
+      } else {
+        setStatus('error');
+      }
     } catch {
       setUploading(false);
       setUploadMsg('');
@@ -63,7 +76,7 @@ export default function CvForm() {
       {status === 'error' && <div className="alert alert-error">Something went wrong. Please try again.</div>}
       <div className="form-group"><label>Full Name *</label><input {...register('fullName',{required:'Required'})} placeholder="e.g. Peter Ochieng" />{errors.fullName && <span className="form-error">{errors.fullName.message}</span>}</div>
       <div className="form-group"><label>Email *</label><input type="email" {...register('email',{required:'Required'})} placeholder="peter@email.com" />{errors.email && <span className="form-error">{errors.email.message}</span>}</div>
-      <div className="form-group"><label>Phone *</label><input {...register('phone',{required:'Required'})} placeholder="+254 700 000 000" />{errors.phone && <span className="form-error">{errors.phone.message}</span>}</div>
+      <div className="form-group"><label>Phone *</label><input {...register('phone',{required:'Required'})} placeholder="+254 735 111 625" />{errors.phone && <span className="form-error">{errors.phone.message}</span>}</div>
       <div className="form-group"><label>I am looking for *</label>
         <select {...register('jobCategory',{required:true})}>
           <option value="">— Select —</option>
@@ -80,6 +93,11 @@ export default function CvForm() {
         {uploading && <p style={{fontSize:'0.85rem',color:'var(--crimson)',marginTop:'0.3rem'}}>⏳ {uploadMsg}</p>}
       </div>
       <div className="form-group"><label>Additional Notes</label><textarea {...register('message')} placeholder="Any availability, location preference, etc." rows={3} /></div>
+      <div
+        className="cf-turnstile"
+        data-sitekey="0x4AAAAAADz7Ang5Mg9YMkhh"
+        style={{ marginBottom: '1rem' }}
+      />
       <button type="submit" className="btn btn-primary" style={{width:'100%'}} disabled={isSubmitting||uploading}>
         {uploading ? uploadMsg : isSubmitting ? 'Submitting...' : 'Submit My CV'}
       </button>

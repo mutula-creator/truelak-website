@@ -2,6 +2,19 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { sendCvApplicationEmail } from '@/lib/email';
 
+async function verifyTurnstile(token) {
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      response: token,
+    }),
+  });
+  const data = await res.json();
+  return data.success;
+}
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -13,6 +26,16 @@ export async function POST(request) {
     const message     = formData.get('message') || '';
     const cvUrl       = formData.get('cvUrl') || '';
     const cvFileName  = formData.get('cvFileName') || '';
+    const token       = formData.get('token') || '';
+
+    // Verify Turnstile
+    if (!token) {
+      return NextResponse.json({ error: 'Security check required' }, { status: 400 });
+    }
+    const valid = await verifyTurnstile(token);
+    if (!valid) {
+      return NextResponse.json({ error: 'Security check failed' }, { status: 400 });
+    }
 
     const conn = await dbConnect();
     if (conn) {
@@ -22,9 +45,7 @@ export async function POST(request) {
 
     await sendCvApplicationEmail({
       fullName, email, phone, jobCategory, jobTitle,
-      message: message,
-      cvUrl,
-      cvFileName,
+      message, cvUrl, cvFileName,
     });
 
     return NextResponse.json({ success: true }, { status: 201 });

@@ -2,9 +2,32 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { sendContactEmail } from '@/lib/email';
 
+async function verifyTurnstile(token) {
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: process.env.TURNSTILE_SECRET_KEY,
+      response: token,
+    }),
+  });
+  const data = await res.json();
+  return data.success;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
+
+    // Verify Turnstile token
+    if (!body.token) {
+      return NextResponse.json({ error: 'Security check required' }, { status: 400 });
+    }
+    const valid = await verifyTurnstile(body.token);
+    if (!valid) {
+      return NextResponse.json({ error: 'Security check failed' }, { status: 400 });
+    }
+
     const conn = await dbConnect();
     if (conn) {
       const { Employer } = await import('@/lib/models');
@@ -15,7 +38,6 @@ export async function POST(request) {
       });
     }
 
-    // Send email notification regardless of DB status
     await sendContactEmail({
       name:    body.name,
       email:   body.email,
