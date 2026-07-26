@@ -12,11 +12,10 @@ export default function AdminJobsPage() {
   const [tab, setTab]           = useState('jobs');
   const [msg, setMsg]           = useState(null);
   const [loading, setLoading]   = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
 
-  // Job form
-  const [jobForm, setJobForm] = useState({ title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'' });
-
-  // Blog form
+  const emptyJob = { title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'', redirectUrl:'' };
+  const [jobForm, setJobForm] = useState(emptyJob);
   const [blogForm, setBlogForm] = useState({ title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true });
 
   const load = async (pw) => {
@@ -43,10 +42,40 @@ export default function AdminJobsPage() {
 
   const postJob = async (e) => {
     e.preventDefault(); setLoading(true); setMsg(null);
-    const res = await fetch('/api/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...jobForm, adminPassword: password }) });
-    if (res.ok) { setMsg({ type:'success', text:'Job posted!' }); setJobForm({ title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'' }); load(password); }
-    else setMsg({ type:'error', text:'Failed to post job.' });
+    if (editingJob) {
+      // Edit existing job
+      const res = await fetch(`/api/jobs/${editingJob}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...jobForm, adminPassword: password }) });
+      if (res.ok) { setMsg({ type:'success', text:'Job updated!' }); setJobForm(emptyJob); setEditingJob(null); load(password); }
+      else setMsg({ type:'error', text:'Failed to update job.' });
+    } else {
+      // New job
+      const res = await fetch('/api/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...jobForm, adminPassword: password }) });
+      if (res.ok) { setMsg({ type:'success', text:'Job posted!' }); setJobForm(emptyJob); load(password); }
+      else setMsg({ type:'error', text:'Failed to post job.' });
+    }
     setLoading(false);
+  };
+
+  const startEdit = (job) => {
+    setEditingJob(job._id);
+    setJobForm({
+      title: job.title || '',
+      category: job.category || 'professional',
+      location: job.location || '',
+      type: job.type || 'Permanent',
+      description: job.description || '',
+      requirements: job.requirements || '',
+      salary: job.salary || '',
+      redirectUrl: job.redirectUrl || '',
+    });
+    setTab('post');
+    setMsg(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingJob(null);
+    setJobForm(emptyJob);
+    setMsg(null);
   };
 
   const postBlog = async (e) => {
@@ -97,16 +126,16 @@ export default function AdminJobsPage() {
 
         <div className={styles.tabs}>
           {[['jobs','💼 Jobs'],['post','➕ Post Job'],['blog','📝 Blog'],['newpost','✏️ New Post'],['applications','📋 Applications'],['enquiries','🏢 Enquiries']].map(([key,label])=>(
-            <button key={key} onClick={()=>{setTab(key);setMsg(null);}} className={`${styles.tab} ${tab===key?styles.activeTab:''}`}>{label}</button>
+            <button key={key} onClick={()=>{setTab(key);setMsg(null);if(key!=='post'){cancelEdit();}}} className={`${styles.tab} ${tab===key?styles.activeTab:''}`}>{label}</button>
           ))}
         </div>
 
         {msg && <div className={`alert alert-${msg.type}`} style={{marginBottom:'1.5rem'}}>{msg.text}</div>}
 
-        {/* ── Post Job ── */}
+        {/* ── Post / Edit Job ── */}
         {tab==='post' && (
           <div className="card">
-            <h3 style={{marginBottom:'1.5rem'}}>Post a New Job</h3>
+            <h3 style={{marginBottom:'1.5rem'}}>{editingJob ? '✏️ Edit Job' : 'Post a New Job'}</h3>
             <form onSubmit={postJob}>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
                 <div className="form-group"><label>Job Title *</label><input value={jobForm.title} onChange={e=>setJobForm({...jobForm,title:e.target.value})} required placeholder="e.g. Senior Accountant" /></div>
@@ -117,7 +146,14 @@ export default function AdminJobsPage() {
               <div className="form-group"><label>Salary</label><input value={jobForm.salary} onChange={e=>setJobForm({...jobForm,salary:e.target.value})} placeholder="e.g. KES 80,000 – 100,000/month" /></div>
               <div className="form-group"><label>Job Description *</label><textarea value={jobForm.description} onChange={e=>setJobForm({...jobForm,description:e.target.value})} required rows={6} placeholder="Describe the role and responsibilities..." /></div>
               <div className="form-group"><label>Requirements</label><textarea value={jobForm.requirements} onChange={e=>setJobForm({...jobForm,requirements:e.target.value})} rows={4} placeholder="Qualifications and experience needed..." /></div>
-              <button type="submit" className="btn btn-primary" disabled={loading}>{loading?'Posting...':'Post Job'}</button>
+              <div className="form-group">
+                <label>External Apply URL <span style={{fontWeight:400,color:'var(--grey-light)'}}>(optional — if set, Apply Now button will redirect here)</span></label>
+                <input value={jobForm.redirectUrl} onChange={e=>setJobForm({...jobForm,redirectUrl:e.target.value})} placeholder="e.g. https://company.com/careers/job-123" />
+              </div>
+              <div style={{display:'flex',gap:'1rem'}}>
+                <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Saving...' : editingJob ? 'Save Changes' : 'Post Job'}</button>
+                {editingJob && <button type="button" className="btn btn-outline" style={{color:'var(--navy)',border:'1.5px solid var(--navy)'}} onClick={cancelEdit}>Cancel</button>}
+              </div>
             </form>
           </div>
         )}
@@ -131,10 +167,12 @@ export default function AdminJobsPage() {
                 <div>
                   <span className={`tag tag-${job.category}`} style={{marginRight:'0.5rem'}}>{job.category}</span>
                   <span className={`tag tag-${job.type?.toLowerCase()}`}>{job.type}</span>
+                  {job.redirectUrl && <span style={{marginLeft:'0.5rem',fontSize:'0.75rem',color:'var(--grey-light)'}}>🔗 External link</span>}
                   <h4 style={{marginTop:'0.5rem'}}>{job.title}</h4>
                   <p style={{fontSize:'0.85rem',color:'var(--grey-light)'}}>{job.location} · {new Date(job.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div style={{display:'flex',gap:'0.5rem'}}>
+                <div style={{display:'flex',gap:'0.5rem',flexWrap:'wrap'}}>
+                  <button onClick={()=>startEdit(job)} className="btn btn-outline" style={{padding:'0.5rem 1rem',fontSize:'0.85rem',color:'var(--navy)',border:'1.5px solid var(--navy)'}}>✏️ Edit</button>
                   <button onClick={()=>toggleJob(job)} className="btn btn-outline" style={{padding:'0.5rem 1rem',fontSize:'0.85rem',color:'var(--navy)',border:'1.5px solid var(--navy)'}}>{job.isActive?'Deactivate':'Activate'}</button>
                   <button onClick={()=>deleteJob(job._id)} className="btn btn-primary" style={{padding:'0.5rem 1rem',fontSize:'0.85rem'}}>Delete</button>
                 </div>
@@ -161,8 +199,8 @@ export default function AdminJobsPage() {
                   </select>
                 </div>
               </div>
-              <div className="form-group"><label>Short Excerpt * (shown on blog listing page)</label><textarea value={blogForm.excerpt} onChange={e=>setBlogForm({...blogForm,excerpt:e.target.value})} required rows={3} placeholder="A 2-3 sentence summary of the post..." /></div>
-              <div className="form-group"><label>Full Article Content *</label><textarea value={blogForm.content} onChange={e=>setBlogForm({...blogForm,content:e.target.value})} required rows={15} placeholder="Write your full article here. You can use plain text or basic HTML..." style={{fontFamily:'monospace',fontSize:'0.9rem'}} /></div>
+              <div className="form-group"><label>Short Excerpt *</label><textarea value={blogForm.excerpt} onChange={e=>setBlogForm({...blogForm,excerpt:e.target.value})} required rows={3} placeholder="A 2-3 sentence summary of the post..." /></div>
+              <div className="form-group"><label>Full Article Content *</label><textarea value={blogForm.content} onChange={e=>setBlogForm({...blogForm,content:e.target.value})} required rows={15} placeholder="Write your full article here..." style={{fontFamily:'monospace',fontSize:'0.9rem'}} /></div>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
                 <div className="form-group"><label>Cover Image URL</label><input value={blogForm.image} onChange={e=>setBlogForm({...blogForm,image:e.target.value})} placeholder="/images/hero.jpg" /></div>
                 <div className="form-group"><label>Status</label>
@@ -191,7 +229,7 @@ export default function AdminJobsPage() {
                 <button onClick={()=>deletePost(post._id)} className="btn btn-primary" style={{padding:'0.5rem 1rem',fontSize:'0.85rem'}}>Delete</button>
               </div>
             ))}
-            {posts.length===0 && <p style={{color:'var(--grey-light)'}}>No blog posts yet. Use New Post to write your first article.</p>}
+            {posts.length===0 && <p style={{color:'var(--grey-light)'}}>No blog posts yet.</p>}
           </div>
         )}
 
