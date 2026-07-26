@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaMapMarkerAlt, FaBriefcase, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaBriefcase, FaClock, FaBuilding } from 'react-icons/fa';
 import styles from './JobCard.module.css';
 
 export default function JobCard({ job }) {
@@ -10,6 +10,11 @@ export default function JobCard({ job }) {
         <span className={`tag tag-${job.type?.toLowerCase()}`}>{job.type}</span>
       </div>
       <h3 className={styles.title}>{job.title}</h3>
+      {job.company && (
+        <p style={{ fontSize:'0.85rem', color:'var(--grey-light)', marginBottom:'0.5rem', display:'flex', alignItems:'center', gap:'0.4rem' }}>
+          <FaBuilding size={11} /> {job.company}
+        </p>
+      )}
       <div className={styles.meta}>
         <span><FaMapMarkerAlt /> {job.location}</span>
         {job.salary && <span><FaBriefcase /> {job.salary}</span>}

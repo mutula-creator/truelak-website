@@ -2,6 +2,8 @@ import Link from 'next/link';
 import dbConnect from '@/lib/mongodb';
 import styles from './page.module.css';
 
+export const revalidate = 0;
+
 export const metadata = { title: 'Blog & News | TrueLak Recruitment Agency' };
 
 const STATIC_POSTS = [
