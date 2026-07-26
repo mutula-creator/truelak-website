@@ -15,7 +15,7 @@ async function getPosts() {
     const { Blog } = await import('@/lib/models');
     const dbPosts = await Blog.find({ isPublished: true }).sort({ createdAt: -1 }).lean();
     const serialized = JSON.parse(JSON.stringify(dbPosts));
-    return serialized.length > 0 ? [...serialized, ...STATIC_POSTS] : STATIC_POSTS;
+    return [...serialized, ...STATIC_POSTS];
   } catch { return STATIC_POSTS; }
 }
 
@@ -34,7 +34,7 @@ export default async function BlogPage() {
           <div className={styles.grid}>
             {posts.map((post) => (
               <article key={post._id} className={styles.card}>
-                <div className={styles.cardImage} style={{ backgroundImage: `url(${post.image})` }}>
+                <div className={styles.cardImage} style={{ backgroundImage: `url(${post.image || '/images/hero.jpg'})` }}>
                   <span className={styles.catTag}>{post.category}</span>
                 </div>
                 <div className={styles.cardBody}>

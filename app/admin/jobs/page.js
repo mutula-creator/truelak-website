@@ -1,6 +1,9 @@
 'use client';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import styles from './page.module.css';
+
+const BlogEditor = dynamic(() => import('@/components/BlogEditor'), { ssr: false });
 
 export default function AdminJobsPage() {
   const [password, setPassword] = useState('');
@@ -13,10 +16,12 @@ export default function AdminJobsPage() {
   const [msg, setMsg]           = useState(null);
   const [loading, setLoading]   = useState(false);
   const [editingJob, setEditingJob] = useState(null);
+  const [editingPost, setEditingPost] = useState(null);
 
   const emptyJob = { title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'', company:'', redirectUrl:'' };
+  const emptyBlog = { title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true };
   const [jobForm, setJobForm] = useState(emptyJob);
-  const [blogForm, setBlogForm] = useState({ title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true });
+  const [blogForm, setBlogForm] = useState(emptyBlog);
 
   const load = async (pw) => {
     const [j, a, e, b] = await Promise.all([
@@ -77,11 +82,37 @@ export default function AdminJobsPage() {
     setMsg(null);
   };
 
+  const startEditPost = (post) => {
+    setEditingPost(post._id);
+    setBlogForm({
+      title: post.title || '',
+      category: post.category || 'Industry Insights',
+      excerpt: post.excerpt || '',
+      content: post.content || '',
+      image: post.image || '/images/hero.jpg',
+      isPublished: post.isPublished ?? true,
+    });
+    setTab('newpost');
+    setMsg(null);
+  };
+
+  const cancelEditPost = () => {
+    setEditingPost(null);
+    setBlogForm(emptyBlog);
+    setMsg(null);
+  };
+
   const postBlog = async (e) => {
     e.preventDefault(); setLoading(true); setMsg(null);
-    const res = await fetch('/api/blog', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...blogForm, adminPassword: password }) });
-    if (res.ok) { setMsg({ type:'success', text:'Blog post published!' }); setBlogForm({ title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true }); load(password); }
-    else setMsg({ type:'error', text:'Failed to publish post.' });
+    if (editingPost) {
+      const res = await fetch(`/api/blog/${editingPost}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...blogForm, adminPassword: password }) });
+      if (res.ok) { setMsg({ type:'success', text:'Blog post updated!' }); setBlogForm(emptyBlog); setEditingPost(null); load(password); }
+      else setMsg({ type:'error', text:'Failed to update post.' });
+    } else {
+      const res = await fetch('/api/blog', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...blogForm, adminPassword: password }) });
+      if (res.ok) { setMsg({ type:'success', text:'Blog post published!' }); setBlogForm(emptyBlog); load(password); }
+      else setMsg({ type:'error', text:'Failed to publish post.' });
+    }
     setLoading(false);
   };
 
@@ -125,7 +156,7 @@ export default function AdminJobsPage() {
 
         <div className={styles.tabs}>
           {[['jobs','💼 Jobs'],['post','➕ Post Job'],['blog','📝 Blog'],['newpost','✏️ New Post'],['applications','📋 Applications'],['enquiries','🏢 Enquiries']].map(([key,label])=>(
-            <button key={key} onClick={()=>{setTab(key);setMsg(null);if(key!=='post'){cancelEdit();}}} className={`${styles.tab} ${tab===key?styles.activeTab:''}`}>{label}</button>
+            <button key={key} onClick={()=>{setTab(key);setMsg(null);if(key!=='post'){cancelEdit();}if(key!=='newpost'){cancelEditPost();}}} className={`${styles.tab} ${tab===key?styles.activeTab:''}`}>{label}</button>
           ))}
         </div>
 
@@ -149,7 +180,7 @@ export default function AdminJobsPage() {
               <div className="form-group"><label>Job Description *</label><textarea value={jobForm.description} onChange={e=>setJobForm({...jobForm,description:e.target.value})} required rows={6} placeholder="Describe the role and responsibilities..." /></div>
               <div className="form-group"><label>Requirements</label><textarea value={jobForm.requirements} onChange={e=>setJobForm({...jobForm,requirements:e.target.value})} rows={4} placeholder="Qualifications and experience needed..." /></div>
               <div className="form-group">
-                <label>External Apply URL <span style={{fontWeight:400,color:'var(--grey-light)'}}>(optional — if set, Apply Now button will redirect here)</span></label>
+                <label>External Apply URL <span style={{fontWeight:400,color:'var(--grey-light)'}}>(optional)</span></label>
                 <input value={jobForm.redirectUrl} onChange={e=>setJobForm({...jobForm,redirectUrl:e.target.value})} placeholder="e.g. https://company.com/careers/job-123" />
               </div>
               <div style={{display:'flex',gap:'1rem'}}>
@@ -184,10 +215,10 @@ export default function AdminJobsPage() {
           </div>
         )}
 
-        {/* ── New Blog Post ── */}
+        {/* ── New / Edit Blog Post ── */}
         {tab==='newpost' && (
           <div className="card">
-            <h3 style={{marginBottom:'1.5rem'}}>Write a New Blog Post</h3>
+            <h3 style={{marginBottom:'1.5rem'}}>{editingPost ? '✏️ Edit Blog Post' : 'Write a New Blog Post'}</h3>
             <form onSubmit={postBlog}>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
                 <div className="form-group"><label>Post Title *</label><input value={blogForm.title} onChange={e=>setBlogForm({...blogForm,title:e.target.value})} required placeholder="e.g. Top 5 CV Tips for 2026" /></div>
@@ -202,8 +233,11 @@ export default function AdminJobsPage() {
                 </div>
               </div>
               <div className="form-group"><label>Short Excerpt *</label><textarea value={blogForm.excerpt} onChange={e=>setBlogForm({...blogForm,excerpt:e.target.value})} required rows={3} placeholder="A 2-3 sentence summary of the post..." /></div>
-              <div className="form-group"><label>Full Article Content *</label><textarea value={blogForm.content} onChange={e=>setBlogForm({...blogForm,content:e.target.value})} required rows={15} placeholder="Write your full article here..." style={{fontFamily:'monospace',fontSize:'0.9rem'}} /></div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+              <div className="form-group">
+                <label>Full Article Content *</label>
+                <BlogEditor value={blogForm.content} onChange={(val) => setBlogForm({...blogForm, content: val})} />
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginTop:'1rem'}}>
                 <div className="form-group"><label>Cover Image URL</label><input value={blogForm.image} onChange={e=>setBlogForm({...blogForm,image:e.target.value})} placeholder="/images/hero.jpg" /></div>
                 <div className="form-group"><label>Status</label>
                   <select value={blogForm.isPublished} onChange={e=>setBlogForm({...blogForm,isPublished:e.target.value==='true'})}>
@@ -212,7 +246,10 @@ export default function AdminJobsPage() {
                   </select>
                 </div>
               </div>
-              <button type="submit" className="btn btn-primary" disabled={loading}>{loading?'Publishing...':'Publish Post'}</button>
+              <div style={{display:'flex',gap:'1rem'}}>
+                <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Saving...' : editingPost ? 'Save Changes' : 'Publish Post'}</button>
+                {editingPost && <button type="button" className="btn btn-outline" style={{color:'var(--navy)',border:'1.5px solid var(--navy)'}} onClick={cancelEditPost}>Cancel</button>}
+              </div>
             </form>
           </div>
         )}
@@ -228,7 +265,10 @@ export default function AdminJobsPage() {
                   <h4 style={{marginTop:'0.25rem'}}>{post.title}</h4>
                   <p style={{fontSize:'0.85rem',color:'var(--grey-light)'}}>{new Date(post.createdAt).toLocaleDateString()} · {post.isPublished ? '✅ Published' : '⏸ Draft'}</p>
                 </div>
-                <button onClick={()=>deletePost(post._id)} className="btn btn-primary" style={{padding:'0.5rem 1rem',fontSize:'0.85rem'}}>Delete</button>
+                <div style={{display:'flex',gap:'0.5rem'}}>
+                  <button onClick={()=>startEditPost(post)} className="btn btn-outline" style={{padding:'0.5rem 1rem',fontSize:'0.85rem',color:'var(--navy)',border:'1.5px solid var(--navy)'}}>✏️ Edit</button>
+                  <button onClick={()=>deletePost(post._id)} className="btn btn-primary" style={{padding:'0.5rem 1rem',fontSize:'0.85rem'}}>Delete</button>
+                </div>
               </div>
             ))}
             {posts.length===0 && <p style={{color:'var(--grey-light)'}}>No blog posts yet.</p>}
