@@ -19,10 +19,6 @@ export default async function JobDetailPage({ params }) {
   const job = await getJob(params.id);
   if (!job) notFound();
 
-  const applyButton = job.redirectUrl
-    ? <a href={job.redirectUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{width:'100%',justifyContent:'center',display:'flex',marginBottom:'1.5rem'}}>Apply on Company Website →</a>
-    : null;
-
   return (
     <>
       <div className="page-hero">
@@ -35,7 +31,7 @@ export default async function JobDetailPage({ params }) {
             <span className={`tag tag-${job.type?.toLowerCase()}`}>{job.type}</span>
           </div>
           <h1>{job.title}</h1>
-          <p>{job.location}{job.salary?` · ${job.salary}`:''}</p>
+          <p>{job.company && `${job.company} · `}{job.location}{job.salary?` · ${job.salary}`:''}</p>
         </div>
       </div>
 
@@ -54,19 +50,19 @@ export default async function JobDetailPage({ params }) {
             )}
           </div>
           <div>
-  <div className="card">
-    <h3 style={{marginBottom:'0.25rem'}}>Apply for this Role</h3>
-    <p style={{color:'var(--grey-light)',fontSize:'0.88rem',marginBottom:'1.5rem'}}>
-      {job.redirectUrl 
-        ? 'This position is hosted externally. Click below to apply directly on the company website.'
-        : 'Fill in the form and our team will be in touch.'}
-    </p>
-    {job.redirectUrl
-      ? <a href={job.redirectUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{width:'100%',justifyContent:'center',display:'flex'}}>Apply on Company Website →</a>
-      : <ApplyForm jobId={job._id} jobTitle={job.title} jobCategory={job.category} />
-    }
-  </div>
-</div>
+            <div className="card">
+              <h3 style={{marginBottom:'0.25rem'}}>Apply for this Role</h3>
+              <p style={{color:'var(--grey-light)',fontSize:'0.88rem',marginBottom:'1.5rem'}}>
+                {job.redirectUrl
+                  ? 'This position is hosted externally. Click below to apply directly on the company website.'
+                  : 'Fill in the form and our team will be in touch.'}
+              </p>
+              {job.redirectUrl
+                ? <a href={job.redirectUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{width:'100%',justifyContent:'center',display:'flex'}}>Apply on Company Website →</a>
+                : <ApplyForm jobId={job._id} jobTitle={job.title} jobCategory={job.category} />
+              }
+            </div>
+          </div>
         </div>
       </section>
     </>
