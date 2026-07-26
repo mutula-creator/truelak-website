@@ -26,7 +26,15 @@ export async function PATCH(request, { params }) {
     const conn = await dbConnect();
     if (!conn) return NextResponse.json({ error: 'No database' }, { status: 503 });
     const { Blog } = await import('@/lib/models');
-    const post = await Blog.findByIdAndUpdate(params.id, body, { new: true }).lean();
+
+    // Remove adminPassword before saving
+    const { adminPassword, ...updateData } = body;
+
+    const post = await Blog.findByIdAndUpdate(
+      params.id,
+      { $set: updateData },
+      { new: true }
+    ).lean();
     return NextResponse.json({ post: JSON.parse(JSON.stringify(post)) });
   } catch {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
