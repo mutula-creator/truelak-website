@@ -7,9 +7,15 @@ export const metadata = {
   title: 'TrueLak Recruitment Agency | Professional & Labour Placements in East Africa & UAE',
   description: 'TrueLak connects top talent with leading employers across East Africa and UAE.',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
   },
+  manifest: '/site.webmanifest',
   openGraph: {
     title: 'TrueLak Recruitment Agency',
     description: 'TrueLak connects top talent with leading employers across East Africa and UAE.',
