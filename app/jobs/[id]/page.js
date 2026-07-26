@@ -19,6 +19,10 @@ export default async function JobDetailPage({ params }) {
   const job = await getJob(params.id);
   if (!job) notFound();
 
+  const applyButton = job.redirectUrl
+    ? <a href={job.redirectUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{width:'100%',justifyContent:'center',display:'flex',marginBottom:'1.5rem'}}>Apply on Company Website →</a>
+    : null;
+
   return (
     <>
       <div className="page-hero">
@@ -49,24 +53,11 @@ export default async function JobDetailPage({ params }) {
               </div>
             )}
           </div>
-
           <div>
             <div className="card">
               <h3 style={{marginBottom:'0.25rem'}}>Apply for this Role</h3>
-              <p style={{color:'var(--grey-light)',fontSize:'0.88rem',marginBottom:'1.5rem'}}>
-                Fill in the form and our team will be in touch.
-              </p>
-              {job.redirectUrl && (
-                
-                  href={job.redirectUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary"
-                  style={{width:'100%',justifyContent:'center',display:'flex',marginBottom:'1.5rem'}}
-                >
-                  Apply on Company Website →
-                </a>
-              )}
+              <p style={{color:'var(--grey-light)',fontSize:'0.88rem',marginBottom:'1.5rem'}}>Fill in the form and our team will be in touch.</p>
+              {applyButton}
               <ApplyForm jobId={job._id} jobTitle={job.title} jobCategory={job.category} />
             </div>
           </div>
