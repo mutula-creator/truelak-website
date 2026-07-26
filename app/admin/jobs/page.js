@@ -17,9 +17,10 @@ export default function AdminJobsPage() {
   const [loading, setLoading]   = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const emptyJob = { title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'', company:'', redirectUrl:'' };
-  const emptyBlog = { title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true };
+  const emptyBlog = { title:'', category:'Industry Insights', excerpt:'', content:'', image:'', isPublished: true };
   const [jobForm, setJobForm] = useState(emptyJob);
   const [blogForm, setBlogForm] = useState(emptyBlog);
 
@@ -89,7 +90,7 @@ export default function AdminJobsPage() {
       category: post.category || 'Industry Insights',
       excerpt: post.excerpt || '',
       content: post.content || '',
-      image: post.image || '/images/hero.jpg',
+      image: post.image || '',
       isPublished: post.isPublished ?? true,
     });
     setTab('newpost');
@@ -237,8 +238,40 @@ export default function AdminJobsPage() {
                 <label>Full Article Content *</label>
                 <BlogEditor value={blogForm.content} onChange={(val) => setBlogForm({...blogForm, content: val})} />
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginTop:'1rem'}}>
-                <div className="form-group"><label>Cover Image URL</label><input value={blogForm.image} onChange={e=>setBlogForm({...blogForm,image:e.target.value})} placeholder="/images/hero.jpg" /></div>
+              <div style={{marginTop:'1rem'}}>
+                <div className="form-group">
+                  <label>Cover Image</label>
+                  <div style={{display:'flex',gap:'0.75rem',alignItems:'center',flexWrap:'wrap'}}>
+                    <input
+                      value={blogForm.image}
+                      onChange={e=>setBlogForm({...blogForm,image:e.target.value})}
+                      placeholder="Upload an image or paste a URL"
+                      style={{flex:1}}
+                    />
+                    <label className="btn btn-outline" style={{color:'var(--navy)',border:'1.5px solid var(--navy)',cursor:'pointer',whiteSpace:'nowrap'}}>
+                      {uploadingImage ? 'Uploading...' : '📷 Upload Image'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{display:'none'}}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingImage(true);
+                          const fd = new FormData();
+                          fd.append('file', file);
+                          const res = await fetch('/api/upload-image', { method:'POST', body:fd });
+                          const data = await res.json();
+                          if (data.url) setBlogForm(prev => ({...prev, image: data.url}));
+                          setUploadingImage(false);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {blogForm.image && (blogForm.image.startsWith('http') || blogForm.image.startsWith('/')) && (
+                    <img src={blogForm.image} alt="Preview" style={{marginTop:'0.75rem',height:'120px',objectFit:'cover',borderRadius:'8px',width:'100%'}} />
+                  )}
+                </div>
                 <div className="form-group"><label>Status</label>
                   <select value={blogForm.isPublished} onChange={e=>setBlogForm({...blogForm,isPublished:e.target.value==='true'})}>
                     <option value="true">Published</option>
