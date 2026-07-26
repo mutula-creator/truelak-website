@@ -14,7 +14,7 @@ export default function AdminJobsPage() {
   const [loading, setLoading]   = useState(false);
   const [editingJob, setEditingJob] = useState(null);
 
-  const emptyJob = { title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'', redirectUrl:'' };
+  const emptyJob = { title:'', category:'professional', location:'', type:'Permanent', description:'', requirements:'', salary:'', company:'', redirectUrl:'' };
   const [jobForm, setJobForm] = useState(emptyJob);
   const [blogForm, setBlogForm] = useState({ title:'', category:'Industry Insights', excerpt:'', content:'', image:'/images/hero.jpg', isPublished: true });
 
@@ -43,12 +43,10 @@ export default function AdminJobsPage() {
   const postJob = async (e) => {
     e.preventDefault(); setLoading(true); setMsg(null);
     if (editingJob) {
-      // Edit existing job
       const res = await fetch(`/api/jobs/${editingJob}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...jobForm, adminPassword: password }) });
       if (res.ok) { setMsg({ type:'success', text:'Job updated!' }); setJobForm(emptyJob); setEditingJob(null); load(password); }
       else setMsg({ type:'error', text:'Failed to update job.' });
     } else {
-      // New job
       const res = await fetch('/api/jobs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ...jobForm, adminPassword: password }) });
       if (res.ok) { setMsg({ type:'success', text:'Job posted!' }); setJobForm(emptyJob); load(password); }
       else setMsg({ type:'error', text:'Failed to post job.' });
@@ -66,6 +64,7 @@ export default function AdminJobsPage() {
       description: job.description || '',
       requirements: job.requirements || '',
       salary: job.salary || '',
+      company: job.company || '',
       redirectUrl: job.redirectUrl || '',
     });
     setTab('post');
@@ -143,7 +142,10 @@ export default function AdminJobsPage() {
                 <div className="form-group"><label>Category *</label><select value={jobForm.category} onChange={e=>setJobForm({...jobForm,category:e.target.value})}><option value="professional">Professional</option><option value="labour">Labour / Blue-Collar</option></select></div>
                 <div className="form-group"><label>Type *</label><select value={jobForm.type} onChange={e=>setJobForm({...jobForm,type:e.target.value})}><option value="Permanent">Permanent</option><option value="Contract">Contract</option><option value="Temporary">Temporary</option></select></div>
               </div>
-              <div className="form-group"><label>Salary</label><input value={jobForm.salary} onChange={e=>setJobForm({...jobForm,salary:e.target.value})} placeholder="e.g. KES 80,000 – 100,000/month" /></div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+                <div className="form-group"><label>Salary</label><input value={jobForm.salary} onChange={e=>setJobForm({...jobForm,salary:e.target.value})} placeholder="e.g. KES 80,000 – 100,000/month" /></div>
+                <div className="form-group"><label>Company Name <span style={{fontWeight:400,color:'var(--grey-light)'}}>(optional)</span></label><input value={jobForm.company} onChange={e=>setJobForm({...jobForm,company:e.target.value})} placeholder="e.g. Equity Bank" /></div>
+              </div>
               <div className="form-group"><label>Job Description *</label><textarea value={jobForm.description} onChange={e=>setJobForm({...jobForm,description:e.target.value})} required rows={6} placeholder="Describe the role and responsibilities..." /></div>
               <div className="form-group"><label>Requirements</label><textarea value={jobForm.requirements} onChange={e=>setJobForm({...jobForm,requirements:e.target.value})} rows={4} placeholder="Qualifications and experience needed..." /></div>
               <div className="form-group">
@@ -169,7 +171,7 @@ export default function AdminJobsPage() {
                   <span className={`tag tag-${job.type?.toLowerCase()}`}>{job.type}</span>
                   {job.redirectUrl && <span style={{marginLeft:'0.5rem',fontSize:'0.75rem',color:'var(--grey-light)'}}>🔗 External link</span>}
                   <h4 style={{marginTop:'0.5rem'}}>{job.title}</h4>
-                  <p style={{fontSize:'0.85rem',color:'var(--grey-light)'}}>{job.location} · {new Date(job.createdAt).toLocaleDateString()}</p>
+                  <p style={{fontSize:'0.85rem',color:'var(--grey-light)'}}>{job.company && `${job.company} · `}{job.location} · {new Date(job.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div style={{display:'flex',gap:'0.5rem',flexWrap:'wrap'}}>
                   <button onClick={()=>startEdit(job)} className="btn btn-outline" style={{padding:'0.5rem 1rem',fontSize:'0.85rem',color:'var(--navy)',border:'1.5px solid var(--navy)'}}>✏️ Edit</button>
